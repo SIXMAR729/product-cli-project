@@ -2,6 +2,7 @@
 
 This project is a complete backend system for managing products and orders, built with Python and gRPC. It features a command-line interface (CLI) for administration and an intelligent AI agent for processing natural language commands.
 
+![Uploading agent_ai.png…]()
 
 
 ## ✨ Features
