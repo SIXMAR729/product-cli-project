@@ -53,6 +53,7 @@ class Database:
         with self._get_connection() as conn:
             conn.execute("INSERT INTO products (product_id, name, description, price) VALUES (?, ?, ?, ?)",
                          (product_id, name, description, price))
+            conn.commit() # CORRECTED: Added commit to save the new product
         return self.get_product(product_id)
 
     def get_product(self, product_id):
@@ -63,6 +64,7 @@ class Database:
         with self._get_connection() as conn:
             cursor = conn.execute("UPDATE products SET name=?, description=?, price=? WHERE product_id=?",
                                   (name, description, price, product_id))
+            conn.commit() 
             if cursor.rowcount == 0:
                 return None
         return self.get_product(product_id)
@@ -70,8 +72,8 @@ class Database:
     def delete_product(self, product_id):
         with self._get_connection() as conn:
             cursor = conn.execute("DELETE FROM products WHERE product_id = ?", (product_id,))
-            conn.commit()  
-        return cursor.rowcount > 0
+            conn.commit()
+            return cursor.rowcount > 0
 
     def list_products(self):
         with self._get_connection() as conn:
@@ -96,6 +98,7 @@ class Database:
             for item in items:
                 conn.execute("INSERT INTO order_items (order_id, product_id, quantity, price_per_item) VALUES (?, ?, ?, ?)",
                                (order_id, item.product_id, item.quantity, item.price_per_item))
+            conn.commit() 
         return self.get_order(order_id)
 
     def get_order(self, order_id):
@@ -109,6 +112,7 @@ class Database:
     def update_order_status(self, order_id, new_status):
         with self._get_connection() as conn:
             cursor = conn.execute("UPDATE orders SET status=? WHERE order_id=?", (new_status, order_id))
+            conn.commit() 
             if cursor.rowcount == 0:
                 return None, []
         return self.get_order(order_id)
@@ -129,14 +133,26 @@ class Database:
             orders_list.append(order_dict)
         return json.dumps(orders_list, indent=2)
 
+
 class ProductServiceServicer(order_api_pb2_grpc.ProductServiceServicer):
     def __init__(self, db):
         self.db = db
 
     def CreateProduct(self, request, context):
+        # Basic validation
+        if not request.name:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("Product name is required.")
+            return order_api_pb2.Product()
+        if request.price <= 0:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details("Price must be greater than zero.")
+            return order_api_pb2.Product()
+        
         row = self.db.create_product(request.name, request.description, request.price)
         return order_api_pb2.Product(**row)
 
+    # ... (rest of ProductServiceServicer methods are correct) ...
     def GetProduct(self, request, context):
         row = self.db.get_product(request.product_id)
         if not row:
@@ -167,12 +183,17 @@ class ProductServiceServicer(order_api_pb2_grpc.ProductServiceServicer):
         json_data = self.db.export_products()
         return order_api_pb2.ExportResponse(json_data=json_data)
 
+
 class OrderServiceServicer(order_api_pb2_grpc.OrderServiceServicer):
     def __init__(self, db):
         self.db = db
 
     def CreateOrder(self, request, context):
         order_row, item_rows = self.db.create_order(request.user_id, request.items)
+        if not order_row:
+             context.set_code(grpc.StatusCode.INTERNAL)
+             context.set_details("Failed to create order.")
+             return order_api_pb2.Order()
         items = [order_api_pb2.Order.Item(**item) for item in item_rows]
         return order_api_pb2.Order(**order_row, items=items)
 
@@ -199,6 +220,7 @@ class OrderServiceServicer(order_api_pb2_grpc.OrderServiceServicer):
     def ExportOrders(self, request, context):
         json_data = self.db.export_orders()
         return order_api_pb2.ExportResponse(json_data=json_data)
+
 
 def serve():
     db = Database(DATABASE_NAME)

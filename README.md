@@ -1,44 +1,98 @@
-# Product Service gRPC CLI
+# gRPC AI-Powered Order API
 
-A Command-Line Interface (CLI) for managing product data (add, delete, edit, list) via a gRPC API.
+This project is a complete backend system for managing products and orders, built with Python and gRPC. It features a command-line interface (CLI) for administration and an intelligent AI agent for processing natural language commands.
 
----
-## Features
 
-* **Add** a new product
-* **Edit** an existing product's information
-* **Delete** a product
-* **List** all products
-* **Count** the total number of products
 
----
-## Installation
+## ✨ Features
 
-1.  Clone this repository to your local machine.
-2.  Install the project in editable mode (recommended for development):
+* **High-Performance API:** Built with gRPC for efficient and fast client-server communication.
+* **Two Core Services:** A `ProductService` for inventory management and an `OrderService` for customer orders.
+* **Full CRUD Functionality:** Supports Create, Read, Update, and Delete operations.
+* **Persistent Storage:** Uses a lightweight SQLite database to store all data.
+* **Command-Line Interface:** A powerful CLI (`product_cli.py`) for direct database management.
+* **AI Agent:** An interactive agent (`run_agent.py`) powered by the Google Gemini API that uses the gRPC services as tools.
 
+## 🛠️ Technologies Used
+
+* **Backend:** Python
+* **API Framework:** gRPC, Protobuf
+* **Database:** SQLite
+* **AI:** Google Gemini API (`google-generativai`)
+* **CLI:** `argparse`
+
+## 🚀 Getting Started
+
+Follow these steps to get the project running on your local machine.
+
+### 1. Prerequisites
+
+* Python 3.8+
+* `pip` and `venv`
+
+### 2. Installation & Setup
+
+1.  **Clone the repository:**
     ```bash
-    pip install -e .
+    git clone <your-repository-url>
+    cd <your-repository-folder>
     ```
 
----
-## Usage
+2.  **Create and activate a virtual environment:**
+    ```bash
+    # For Windows
+    python -m venv venv
+    .\venv\Scripts\activate
 
-After installation, you can use the `product-cli` command from anywhere in your terminal.
+    # For macOS/Linux
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
 
-### **1. Add a new product**
+3.  **Install dependencies:**
+    ```bash
+    pip install grpcio grpcio-tools google-generativeai python-dotenv
+    ```
 
-```bash
-product-cli add --name "Product Name" --price <price> --description "Product description"
+4.  **Generate gRPC Code:**
+    Run the following command from the project's root directory to generate the necessary Python code from the `.proto` file.
+    ```bash
+    python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. order_api.proto
+    ```
 
-product-cli add --name "Wireless Mouse" --price 899.50 --description "A silent wireless mouse."
+5.  **Set Up Environment Variables:**
+    Create a file named `.env` in the same directory as `run_agent.py` and add your Gemini API key:
+    ```
+    GEMINI_API_KEY="YOUR_API_KEY_HERE"
+    ```
 
-product-cli list
+### 3. Usage
 
-product-cli edit --id "prod-xxxxxxxx" [--name "New Name"] [--price <new_price>] [--description "New Description"]
+You will need two separate terminals to run the server and a client.
 
-product-cli edit --id "prod-1234abcd" --price 950.00
+1.  **Start the Server:**
+    In your first terminal, start the gRPC server. It will initialize the database and wait for connections.
+    ```bash
+    python server.py
+    ```
 
-product-cli delete --id "prod-xxxxxxxx"
+2.  **Use the CLI Client:**
+    In a second terminal, you can manage products using the CLI.
+    ```bash
+    # List all products
+    python product_cli.py list
 
-product-cli count
+    # Add a new product
+    python product_cli.py add --name "New Item" --price 19.99 --description "A test item"
+    ```
+
+3.  **Run the AI Agent:**
+    Alternatively, you can run the interactive AI agent in the second terminal.
+    ```bash
+    python run_agent.py
+    ```
+    You can then type commands like `list all products` or `create an order for user-123 with one prod-abc`.
+
+## 📄 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
