@@ -36,8 +36,8 @@ Follow these steps to get the project running on your local machine.
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repository-url>
-    cd <your-repository-folder>
+    git clone <[https://github.com/SIXMAR729/product-cli-project.git]>
+    cd <product-cli-project>
     ```
 
 2.  **Create and activate a virtual environment:**
@@ -63,9 +63,9 @@ Follow these steps to get the project running on your local machine.
     ```
 
 5.  **Set Up Environment Variables:**
-    Create a file named `.env` in the same directory as `run_agent.py` and add your Gemini API key:
+    Run Gemini_Cli
     ```
-    GEMINI_API_KEY="YOUR_API_KEY_HERE"
+    GEMINI_Cli
     ```
 
 ### 3. Usage
