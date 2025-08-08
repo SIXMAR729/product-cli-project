@@ -20,7 +20,7 @@ This project is a complete backend system for managing products and orders, buil
 * **Backend:** Python
 * **API Framework:** gRPC, Protobuf
 * **Database:** SQLite
-* **AI:** Google Gemini API (`google-generativai`)
+* **AI:** Google Gemini CLI (`google-generativai`)
 * **CLI:** `argparse`
 
 ## 🚀 Getting Started
