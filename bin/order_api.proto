@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package my_api.v1;
+
+import "google/protobuf/empty.proto";
+
+// =======================================================
+// Service: ProductService
+// Manages product inventory and information.
+// =======================================================
+service ProductService {
+  rpc CreateProduct(CreateProductRequest) returns (Product);
+  rpc GetProduct(GetProductRequest) returns (Product);
+  rpc UpdateProduct(UpdateProductRequest) returns (Product);
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+  rpc ListProducts(ListProductsRequest) returns (stream Product);
+  rpc CountProducts(google.protobuf.Empty) returns (CountResponse);
+  rpc ExportProducts(google.protobuf.Empty) returns (ExportResponse);
+}
+
+// =======================================================
+// Service: OrderService
+// Manages customer orders and status.
+// =======================================================
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (Order);
+  rpc GetOrder(GetOrderRequest) returns (Order);
+  rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (Order);
+  rpc CountOrders(google.protobuf.Empty) returns (CountResponse);
+  rpc ExportOrders(google.protobuf.Empty) returns (ExportResponse);
+}
+
+
+// =======================================================
+// Reusable Message Types
+// =======================================================
+
+message Product {
+  string product_id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+}
+
+message Order {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    PENDING = 1;
+    SHIPPED = 2;
+    COMPLETED = 3;
+    CANCELLED = 4;
+  }
+  
+  message Item {
+    string product_id = 1;
+    int32 quantity = 2;
+    double price_per_item = 3;
+  }
+
+  string order_id = 1;
+  string user_id = 2;
+  Status status = 3;
+  repeated Item items = 4;
+  double total_amount = 5;
+}
+
+message CountResponse {
+  int64 count = 1;
+}
+
+message ExportResponse {
+  string json_data = 1;
+}
+
+// =======================================================
+// Request & Response Messages for ProductService
+// =======================================================
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  double price = 3;
+}
+
+message GetProductRequest {
+  string product_id = 1;
+}
+
+message UpdateProductRequest {
+  string product_id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+}
+
+message DeleteProductRequest {
+  string product_id = 1;
+}
+
+message DeleteProductResponse {
+  bool success = 1;
+}
+
+message ListProductsRequest {
+  // Fields for pagination can be added here later
+  // int32 page_size = 1;
+  // string page_token = 2;
+}
+
+// =======================================================
+// Request & Response Messages for OrderService
+// =======================================================
+
+message CreateOrderRequest {
+  string user_id = 1;
+  repeated Order.Item items = 2;
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message UpdateOrderStatusRequest {
+  string order_id = 1;
+  Order.Status new_status = 2;
+}
